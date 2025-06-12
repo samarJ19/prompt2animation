@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  username  String   @unique
+  password  String
+  firstName String?
+  lastName  String?
+  avatar    String?
+  
+  // Usage tracking
+  plan      Plan     @default(FREE)
+  apiCalls  Int      @default(0)
+  maxCalls  Int      @default(100)
+  
+  // Relations
+  animations Animation[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("users")
+}
+
+model Animation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  prompt      String
+  
+  // Generated content
+  manimCode   String?
+  videoPath   String?
+  thumbnail   String?
+  
+  // Processing status
+  status      AnimationStatus @default(PENDING)
+  errorLog    String?
+  
+  // Animation settings
+  duration    Float?   @default(5.0)
+  resolution  String   @default("720p")
+  frameRate   Int      @default(30)
+  backgroundColor String @default("#000000")
+  
+  // Relations
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Metadata
+  fileSize    Int?
+  renderTime  Float?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("animations")
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum AnimationStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}

@@ -1,0 +1,5 @@
+node_modules
+backend/manim-api/man
+.env
+
+/app/generated/prisma
